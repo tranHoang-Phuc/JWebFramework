@@ -1,10 +1,14 @@
-package com.uet.phucth115.controller;
+package com.fpt.phucth115.controller;
 
+import com.fpt.phucth115.consts.WebConstants;
+import com.fpt.phucth115.helper.MVCHelper;
+import com.fpt.phucth115.model.BaseModel;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -102,5 +106,53 @@ public abstract class BaseController extends HttpServlet {
     public String getAction() {
         String[] parts = request.getRequestURI().split("/");
         return parts[parts.length - 1].split("[?]")[0];
+    }
+
+    public String getController() {
+        String[] parts = request.getRequestURI().split("/");
+        return parts[parts.length - 2];
+    }
+
+    public void forwardToView(BaseModel model) {
+        String controller = getController();
+        String action = getAction();
+        if (controller.isEmpty()) {
+            return;
+        }
+        forwardToView(controller, action, model);
+    }
+
+    public void forwardToView(String controller, String action, BaseModel model) {
+        try {
+            MVCHelper.setModel(request, model);
+            request.getRequestDispatcher("../view/" + controller + "/" + action + ".jsp").forward(request, response);
+        } catch (ServletException | IOException exception) {
+            Logger.getLogger(BaseController.class.getName()).log(Level.SEVERE, null, exception);
+        }
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            baseProcessRequest(request, response, WebConstants.REQUEST_METHOD_GET);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            Logger.getLogger(BaseController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            baseProcessRequest(request, response, WebConstants.REQUEST_METHOD_POST);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            Logger.getLogger(BaseController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public String getServletInfo() {
+        return "Short description";
     }
 }

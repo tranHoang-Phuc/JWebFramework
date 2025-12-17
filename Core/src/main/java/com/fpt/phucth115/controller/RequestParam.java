@@ -1,4 +1,4 @@
-package com.uet.phucth115.controller;
+package com.fpt.phucth115.controller;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
